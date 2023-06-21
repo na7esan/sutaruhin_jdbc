@@ -3,100 +3,40 @@ package dbSample;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.List;
+
+import dbSample.dao.CountryDAO;
+import dbSample.entity.Country;
 
 public class DbConnectSample06 {
 
     public static void main(String[] args) {
 
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("com.mysql.cj.jdbc.Driver");
+        CountryDAO dao = new CountryDAO();
 
 
-            con = DriverManager.getConnection(
-                "jdbc:mysql://localhost/kadaidb?useSSL=false&allowPublicKeyRetrieval=true",
-                "root",
-                "root"
-            );
-
-            String sql = "SELECT id, name, age from person WHERE id = ?";
+        System.out.print("検索キーワードを入力してください > ");
+        String name = keyIn();
 
 
-            pstmt = con.prepareStatement(sql);
-
-            System.out.print("検索対象のidを数字で入力してください > ");
-            int num1 = Integer.parseInt(keyIn());
-
-            pstmt.setInt(1, num1);
-
-            rs = pstmt.executeQuery();
+        List<Country> list = dao.getCountryFromName(name);
 
 
-            while( rs.next() ){
-
-                String name = rs.getString("Name");
-                int age = rs.getInt("age");
-
-                System.out.println(name);
-                System.out.println(age);
-            }
-
-        } catch (ClassNotFoundException e) {
-            System.err.println("JDBCドライバのロードに失敗しました。");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            System.err.println("データベースに異常が発生しました。");
-            e.printStackTrace();
-        } finally {
-
-            if( rs != null ){
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    System.err.println("ResultSetを閉じるときにエラーが発生しました。");
-                    e.printStackTrace();
-                }
-            }
-            if( pstmt != null ){
-                try {
-                    pstmt.close();
-                } catch (SQLException e) {
-                    System.err.println("Statementを閉じるときにエラーが発生しました。");
-                    e.printStackTrace();
-                }
-            }
-            if( con != null ){
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    System.err.println("データベース切断時にエラーが発生しました。");
-                    e.printStackTrace();
-                }
-            }
+        for(Country item : list){
+            System.out.println(item.getName());
+            System.out.println(item.getPopulation());
         }
-
     }
 
 
     private static String keyIn() {
         String line = null;
         try {
-            BufferedReader key = new BufferedReader(new InputStreamReader(
-                System.in));
+            BufferedReader key = new BufferedReader(new InputStreamReader(System.in));
             line = key.readLine();
         } catch (IOException e) {
 
         }
         return line;
     }
-
 }
